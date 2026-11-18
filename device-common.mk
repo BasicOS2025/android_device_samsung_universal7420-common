@@ -167,6 +167,8 @@ PRODUCT_PACKAGES += \
 	android.hardware.gnss@1.0-service.universal7420
 
 # Graphics
+$(call soong_config_set_bool,libui,legacy_gralloc,true)
+
 PRODUCT_PACKAGES += \
 	android.hardware.graphics.allocator@2.0-impl:64 \
 	android.hardware.graphics.allocator@2.0-service \
@@ -186,6 +188,10 @@ PRODUCT_PACKAGES += \
 	libhidltransport \
 	libhwbinder \
 	vndservicemanager
+
+# ION
+# Exynos 7420 exposes the original ION handle-based ioctl interface.
+$(call soong_config_set_bool,libion,legacy_impl,true)
 
 # Keylayouts
 PRODUCT_COPY_FILES += \
