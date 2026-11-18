@@ -59,11 +59,11 @@ static int ril_internal_wb_amr_callback(HRilClient client __unused,
         return -1;
     }
 
-    if (datalen != 1) {
+    if (data == NULL || datalen != 1) {
         return -1;
     }
 
-    wb_amr_type = *((int *)data);
+    wb_amr_type = *((const unsigned char *)data);
 
     _wb_amr_callback(_wb_amr_data, wb_amr_type);
 

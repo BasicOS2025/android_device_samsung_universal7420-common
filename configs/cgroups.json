@@ -33,7 +33,8 @@
       "Path": "/dev/stune",
       "Mode": "0755",
       "UID": "system",
-      "GID": "system"
+      "GID": "system",
+      "Optional": true
     },
     {
       "Controller": "freezer",

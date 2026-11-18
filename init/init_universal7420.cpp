@@ -28,12 +28,10 @@
    IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <android-base/strings.h>
-
-#define _REALLY_INCLUDE_SYS__SYSTEM_PROPERTIES_H_
-#include <sys/_system_properties.h>
-
-#include "property_service.h"
+#include <cstring>
+#include <string>
+#include <vector>
+#include <sys/system_properties.h>
 
 #include "init_universal7420.h"
 
