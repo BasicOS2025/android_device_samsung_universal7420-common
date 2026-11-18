@@ -133,7 +133,8 @@ PRODUCT_PACKAGES += \
 # DTB
 PRODUCT_HOST_PACKAGES += \
 	dtbhtoolExynos \
-	mkdtbhbootimg7420
+	mkdtbhbootimg7420 \
+	verify_exynos7420_boot
 
 # FastCharge
 PRODUCT_PACKAGES += \

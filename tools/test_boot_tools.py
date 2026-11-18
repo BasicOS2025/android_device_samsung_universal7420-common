@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 """Check actual host packers against Samsung's binary layout with synthetic DTBs."""
 import hashlib
+import lzma
 from pathlib import Path
 import struct
 import subprocess
 import tempfile
+from verify_boot_image import verify
 
 root = Path(__file__).resolve().parents[1]
 tools = root / 'tools/dtbhtool'
@@ -69,6 +71,56 @@ with tempfile.TemporaryDirectory() as temporary:
             digest.update(payload)
             digest.update(struct.pack('<I', len(payload)))
         assert header[-1][:20] == digest.digest()
+
+    # Exercise the production validator against a packed image containing real
+    # newc/XZ layout and an ARM64 init header, then remove boot-critical inputs.
+    def entry(name, payload, mode=0o100755):
+        filename = name.encode() + b'\0'
+        fields = [1, mode, 0, 0, 1, 0, len(payload), 0, 0, 0, 0, len(filename), 0]
+        record = b'070701' + ''.join(f'{value:08x}' for value in fields).encode() + filename
+        record += bytes((-len(record)) % 4)
+        record += payload
+        return record + bytes((-len(payload)) % 4)
+
+    elf = bytearray(64)
+    elf[:6] = b'\x7fELF\x02\x01'
+    struct.pack_into('<H', elf, 18, 183)
+    kernel = bytearray(4096)
+    kernel[56:60] = b'ARMd'
+    (work / 'kernel').write_bytes(kernel)
+    run(work / 'dtbtool', '-o', work / 'dt.img', '-s', '2048', '--dt_dir', dtbs)
+    fstab = b'/dev/block/platform/15570000.ufs/by-name/SYSTEM /system ext4 ro wait,first_stage_mount\n'
+
+    def pack_ramdisk(records):
+        raw = b''.join(records) + entry('TRAILER!!!', b'', 0)
+        compressed = lzma.compress(raw, check=lzma.CHECK_CRC32)
+        (work / 'ramdisk').write_bytes(compressed)
+        run(work / 'mkbootimg', '--kernel', work / 'kernel', '--ramdisk', work / 'ramdisk',
+            '--dt', work / 'dt.img', '--pagesize', '2048', '--output', work / 'boot.img')
+        return (work / 'boot.img').read_bytes() + b'SEANDROIDENFORCE'
+
+    good = pack_ramdisk([entry('init', bytes(elf)), entry('fstab.samsungexynos7420', fstab)])
+    verify(good, 29360128, True)
+    for records, expected in [
+        ([entry('init', bytes(elf))], 'Missing first-stage Samsung fstab'),
+        ([entry('init', bytes(elf)), entry('fstab.samsungexynos7420', fstab.replace(b'first_stage_mount', b'recoveryonly'))], 'System fstab does not permit'),
+        ([entry('init', b'/system/bin/init', 0o120777), entry('fstab.samsungexynos7420', fstab)], 'broken init symlink'),
+    ]:
+        try:
+            verify(pack_ramdisk(records), 29360128, True)
+        except ValueError as error:
+            assert expected in str(error), str(error)
+        else:
+            raise AssertionError('Invalid boot inputs were accepted')
+    corrupted = bytearray(good)
+    corrupted[2048 + 100] ^= 1
+    try:
+        verify(corrupted, 29360128, True)
+    except ValueError as error:
+        assert 'SHA-1 mismatch' in str(error)
+    else:
+        raise AssertionError('Corrupt boot image was accepted')
+    print('PASS: production boot validator accepts XZ/newc first-stage inputs and rejects missing fstab, recovery-only system, broken init and corrupt payloads')
 
     invalid = work / 'invalid'
     invalid.mkdir()
