@@ -327,6 +327,11 @@ PRODUCT_COPY_FILES += \
 	$(COMMON_PATH)/configs/ril/spn-conf.xml:$(TARGET_COPY_OUT_PRODUCT)/etc/spn-conf.xml
 
 # Ramdisk
+# Make the system fstab available before /system/vendor can be mounted.
+EXYNOS7420_FSTAB_VARIANT := $(if $(filter lineage_noble% lineage_zen%,$(TARGET_PRODUCT)),noble,zero)
+PRODUCT_COPY_FILES += \
+    $(COMMON_PATH)/ramdisk/etc/fstab.samsungexynos7420.$(EXYNOS7420_FSTAB_VARIANT):$(TARGET_COPY_OUT_RAMDISK)/fstab.samsungexynos7420
+
 PRODUCT_PACKAGES += \
 	fstab.samsungexynos7420 \
 	init.baseband.rc \

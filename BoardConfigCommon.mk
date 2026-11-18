@@ -20,6 +20,7 @@ BUILD_BROKEN_DUP_RULES := true
 
 # Include path
 TARGET_SPECIFIC_HEADER_PATH := $(COMMON_PATH)/include
+$(call soong_config_set,samsungVars,target_specific_header_path,$(COMMON_PATH)/include)
 
 # APEX
 DEXPREOPT_GENERATE_APEX_IMAGE := true
