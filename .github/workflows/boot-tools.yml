@@ -1,0 +1,16 @@
+name: Validate Samsung boot image tools
+on:
+  workflow_dispatch:
+  push:
+    branches: [lineage-24.0]
+    paths: ['tools/**', 'include/samsung_dtbh.h', '.github/workflows/boot-tools.yml']
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo apt-get update -qq && sudo apt-get install -y libfdt-dev device-tree-compiler libssl-dev
+      - run: python3 tools/test_boot_tools.py

@@ -1,0 +1,23 @@
+// Legacy Exynos 7420 DTBH tools, retained locally after hardware/samsung removal.
+cc_library_host_static {
+    name: "libdtbimg_7420",
+    srcs: ["dtbimg.c"],
+    static_libs: ["libfdt"],
+    local_include_dirs: ["libdtbimg"],
+    include_dirs: ["device/samsung/universal7420-common/include"],
+    export_include_dirs: ["libdtbimg"],
+}
+
+cc_binary_host {
+    name: "dtbhtoolExynos",
+    srcs: ["mkdtbimg.c"],
+    static_libs: ["libdtbimg_7420"],
+}
+
+cc_binary_host {
+    name: "mkdtbhbootimg7420",
+    srcs: ["mkbootimg.c"],
+    static_libs: ["libdtbimg_7420"],
+    shared_libs: ["libcrypto"],
+    cflags: ["-Wno-deprecated-declarations"],
+}

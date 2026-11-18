@@ -1,0 +1,21 @@
+# Copyright (C) 2026 The LineageOS Project
+# SPDX-License-Identifier: Apache-2.0
+# Samsung's legacy header stores DTBH size where newer headers store version.
+# Use its original packer and never pass modern header/version arguments to it.
+
+EXYNOS7420_DTBTOOL := $(HOST_OUT_EXECUTABLES)/dtbhtoolExynos
+EXYNOS7420_MKBOOTIMG := $(HOST_OUT_EXECUTABLES)/mkdtbhbootimg7420
+EXYNOS7420_DTIMAGE := $(PRODUCT_OUT)/dt.img
+
+$(EXYNOS7420_DTIMAGE): $(EXYNOS7420_DTBTOOL) $(INSTALLED_KERNEL_TARGET)
+	$(EXYNOS7420_DTBTOOL) -o $@ -s $(BOARD_KERNEL_PAGESIZE) --dt_dir $(KERNEL_OUT)/arch/arm64/boot/dts
+
+$(INSTALLED_BOOTIMAGE_TARGET): $(EXYNOS7420_MKBOOTIMG) $(EXYNOS7420_DTIMAGE) $(INSTALLED_KERNEL_TARGET) $(INTERNAL_BOOTIMAGE_FILES)
+	$(EXYNOS7420_MKBOOTIMG) --kernel $(INSTALLED_KERNEL_TARGET) --ramdisk $(INSTALLED_RAMDISK_TARGET) --dt $(EXYNOS7420_DTIMAGE) --base $(BOARD_KERNEL_BASE) --pagesize $(BOARD_KERNEL_PAGESIZE) --cmdline "$(INTERNAL_KERNEL_CMDLINE)" $(BOARD_MKBOOTIMG_ARGS) --output $@
+	printf 'SEANDROIDENFORCE' >> $@
+	$(call assert-max-image-size,$@,$(BOARD_BOOTIMAGE_PARTITION_SIZE))
+
+$(INSTALLED_RECOVERYIMAGE_TARGET): $(EXYNOS7420_MKBOOTIMG) $(EXYNOS7420_DTIMAGE) $(recovery_ramdisk) $(recovery_kernel) $(RECOVERYIMAGE_EXTRA_DEPS)
+	$(EXYNOS7420_MKBOOTIMG) --kernel $(recovery_kernel) --ramdisk $(recovery_ramdisk) --dt $(EXYNOS7420_DTIMAGE) --base $(BOARD_KERNEL_BASE) --pagesize $(BOARD_KERNEL_PAGESIZE) --cmdline "$(INTERNAL_KERNEL_CMDLINE)" $(BOARD_MKBOOTIMG_ARGS) --output $@
+	printf 'SEANDROIDENFORCE' >> $@
+	$(call assert-max-image-size,$@,$(BOARD_RECOVERYIMAGE_PARTITION_SIZE))

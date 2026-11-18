@@ -2,33 +2,6 @@ package {
     default_team: "trendy_team_android_media_audio_framework",
 }
 
-soong_config_module_type {
-    name: "android_hardware_audio_config_default",
-    module_type: "cc_defaults",
-    config_namespace: "android_hardware_audio",
-    bool_variables: [
-        "run_64bit",
-    ],
-    properties: ["compile_multilib"],
-}
-
-android_hardware_audio_config_default {
-    name: "android_hardware_audio_config_defaults",
-
-    soong_config_variables: {
-        run_64bit: {
-            conditions_default: {
-                // Prefer 32 bit as the binary must always be installed at the same
-                // location for init to start it and the build system does not support
-                // having two binaries installable to the same location even if they are
-                // not installed in the same build.
-                compile_multilib: "prefer32",
-            },
-            compile_multilib: "64",
-        },
-    },
-}
-
 cc_binary {
     name: "android.hardware.audio.service.exynos",
 
@@ -36,9 +9,8 @@ cc_binary {
     relative_install_path: "hw",
     vendor: true,
 
-    defaults: [
-        "android_hardware_audio_config_defaults",
-    ],
+    // Match the 32-bit primary HAL and HIDL implementations in device-common.mk.
+    compile_multilib: "32",
 
     srcs: ["service.cpp"],
 
