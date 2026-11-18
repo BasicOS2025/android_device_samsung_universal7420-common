@@ -28,7 +28,11 @@
         "target_path": "hardware/samsung_slsi-linaro/openmax"
     },
     {
+        "repository": "android_hardware_samsung_slsi-linaro_interfaces",
+        "target_path": "hardware/samsung_slsi-linaro/interfaces"
+    },
+    {
         "repository": "android_kernel_samsung_universal7420",
         "target_path": "kernel/samsung/universal7420"
     }
-] 
+]
