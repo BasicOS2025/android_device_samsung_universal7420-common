@@ -221,7 +221,7 @@ int main(int argc, char **argv)
         return usage();
     }
 
-    strcpy(hdr.name, board);
+    memcpy(hdr.name, board, strlen(board) + 1);
 
     memcpy(hdr.magic, BOOT_MAGIC, BOOT_MAGIC_SIZE);
 
