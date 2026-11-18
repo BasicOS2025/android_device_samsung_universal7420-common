@@ -56,6 +56,9 @@ LOCAL_CFLAGS += -DPREPROCESSING_ENABLED
 
 LOCAL_MODULE := audio.primary.$(TARGET_BOOTLOADER_BOARD_NAME)
 
+# The audio service and the proprietary RIL client use the 32-bit ABI.
+LOCAL_MULTILIB := 32
+
 LOCAL_MODULE_RELATIVE_PATH := hw
 
 LOCAL_MODULE_TAGS := optional

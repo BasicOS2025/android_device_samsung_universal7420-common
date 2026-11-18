@@ -39,7 +39,7 @@ OVERRIDE_PRODUCT_COMPRESSED_APEX := false
 
 # Audio
 PRODUCT_PACKAGES += \
-	audio.primary.universal7420_32 \
+	audio.primary.universal7420 \
 	audio.r_submix.default \
 	audio.usb.default \
 	tinymix \
